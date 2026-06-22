@@ -1,15 +1,56 @@
 {
   "name": "valcss",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Tiny utility to generate CSS",
-  "main": "dist/valcss.js",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
-    "valcss": "./dist/valcss.js"
+    "valcss": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
   },
   "scripts": {
-    "build": "node build-terser.js",
-    "prepublishOnly": "npm run build"
+    "build": "rollup -c rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "build:watch": "rollup -c rollup.config.ts --configPlugin @rollup/plugin-typescript --watch",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist/types",
+    "build:docs": "typedoc --entryPoints src/index.ts --out docs",
+    "prestart": "pnpm run build",
+    "start": "node dist/cli.js",
+    "watch": "node dist/cli.js --watch",
+    "start:watch": "pnpm run build && pnpm run watch",
+    "clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true})\" --input-type=module",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "release": "changeset",
+    "release:version": "changeset version",
+    "release:publish": "npm run build && changeset publish",
+    "prepare": "husky",
+    "prepublishOnly": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "keywords": [
     "valcss",
     "css",
@@ -21,15 +62,27 @@
   ],
   "author": "Hardik Desai",
   "license": "MIT",
-  "dependencies": {
-    "chokidar": "^4.0.3",
-    "glob": "^11.0.3"
+  "dependencies": {},
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/parser": "^8.59.3",
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "jest": "^30.4.2",
+    "lint-staged": "^17.0.4",
+    "prettier": "^3.8.3",
+    "rollup": "^4.60.4",
+    "rollup-plugin-dts": "^6.4.1",
+    "ts-jest": "^29.4.9",
+    "typedoc": "^0.28.19",
+    "typescript": "^6.0.3"
   },
-  "files": [
-    "dist/valcss.js",
-    "dist/utils/",
-    "README.md"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/hardik-143/valcss.git"
@@ -38,7 +91,7 @@
   "bugs": {
     "url": "https://github.com/hardik-143/valcss/issues"
   },
-  "devDependencies": {
-    "terser": "^5.44.1"
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

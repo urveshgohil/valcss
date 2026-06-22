@@ -45,10 +45,15 @@ npm install -g valcss
 valcss init
 ```
 
-This creates a `valcss.config.js` file in your project:
+This creates a `valcss.config.cjs` file in your project. You can choose another format with `--js`, `--ts`, or `--json`:
+
+```bash
+valcss init --js
+valcss init --ts
+```
 
 ```js
-// valcss.config.js
+// valcss.config.cjs
 module.exports = {
   files: ["index.html", "src/**/*.html"],
   output: "valcss-main.css",
@@ -112,7 +117,7 @@ The config file lets you control:
 - **breakpoints**: Custom responsive breakpoints.
 - **plugins**: Extendable utility generators.
 
-See [`valcss.config.js`](https://github.com/hardik-143/valcss/blob/main/valcss.config.js) for an example.
+See [`valcss.config.cjs`](https://github.com/hardik-143/valcss/blob/main/valcss.config.cjs) for an example.
 
 ---
 
@@ -124,6 +129,8 @@ See [`valcss.config.js`](https://github.com/hardik-143/valcss/blob/main/valcss.c
 | `valcss --output <file>` | Override the default output file     |
 | `valcss --watch`         | Enable file watching/live rebuilds   |
 | `valcss init`            | Scaffold a config file               |
+| `valcss init --js`       | Scaffold an ESM JS config file       |
+| `valcss init --ts`       | Scaffold a TS config file            |
 | `valcss --dry-run`       | Print generated CSS to terminal only |
 | `valcss --help`          | Show help message                    |
 
