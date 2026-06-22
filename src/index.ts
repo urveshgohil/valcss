@@ -68,18 +68,18 @@ if (args[0] === "init") {
 }
 `
             : configFormat === "js"
-                ? `// valcss.config.js
+              ? `// valcss.config.js
 export default ${configObject};
 `
-                : configFormat === "ts"
-                    ? `// valcss.config.ts
+              : configFormat === "ts"
+                ? `// valcss.config.ts
 import type { ValCSSConfig } from "./dist/types/index";
 
 const config: ValCSSConfig = ${configObject};
 
 export default config;
 `
-                    : `// valcss.config.cjs
+                : `// valcss.config.cjs
 module.exports = ${configObject};
 `;
 
@@ -150,7 +150,6 @@ if (args.includes("--output")) {
 }
 
 // ─── bootstrap: load config & plugins ────────────────────────────────────────
-
 
 // ─── build function ───────────────────────────────────────────────────────────
 
@@ -267,14 +266,14 @@ async function main(): Promise<void> {
     setConfig(__CONFIG);
 
     if (watchMode) {
-    try {
-        buildCSS(); // initial run
-        startWatch();
-    } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.error(`❌ ${message}`);
-        process.exit(1);
-    }
+        try {
+            buildCSS(); // initial run
+            startWatch();
+        } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(`❌ ${message}`);
+            process.exit(1);
+        }
     } else {
         buildCSS();
     }

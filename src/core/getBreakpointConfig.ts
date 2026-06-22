@@ -40,7 +40,7 @@ export function getBreakpointConfig(): BreakpointConfig {
             } else {
                 console.warn(
                     `⚠️  Invalid breakpoint value for "${key}": ${rawBreakpoints[key]}. ` +
-                    `Using default "${defaultBreakpoints[key] ?? "none"}" instead.`
+                        `Using default "${defaultBreakpoints[key] ?? "none"}" instead.`
                 );
             }
         } else {

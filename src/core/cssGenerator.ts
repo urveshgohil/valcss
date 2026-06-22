@@ -142,35 +142,43 @@ spacingUtils.my!.generate = (val) =>
     )};`;
 
 spacingUtils.m!.validate = (val) => val === "auto" || validators.spacingValues(val);
-spacingUtils.m!.generate = (val) => `margin: ${val === "auto" ? "auto" : scaleLengthValue(val, spacingScale)};`;
+spacingUtils.m!.generate = (val) =>
+    `margin: ${val === "auto" ? "auto" : scaleLengthValue(val, spacingScale)};`;
 
 // ─── Size utils ───────────────────────────────────────────────────────────────
 
-function createSizeUtils(properties: Record<string, string>, scales: Record<string, Record<string, string>> = {}): StyleMap {
+function createSizeUtils(
+    properties: Record<string, string>,
+    scales: Record<string, Record<string, string>> = {}
+): StyleMap {
     const utils: StyleMap = {};
     for (const [key, cssProp] of Object.entries(properties)) {
         utils[key] = {
-            validate: (val) => validators.lengthUnit(val) || Boolean((scales[key] ?? sizeScale)[val]),
+            validate: (val) =>
+                validators.lengthUnit(val) || Boolean((scales[key] ?? sizeScale)[val]),
             generate: (val: string) => `${cssProp}: ${scaleValue(val, scales[key] ?? sizeScale)};`,
         };
     }
     return utils;
 }
 
-const sizeUtils = createSizeUtils({
-    w: "width",
-    h: "height",
-    "max-w": "max-width",
-    "min-w": "min-width",
-    "max-h": "max-height",
-    "min-h": "min-height",
-    size: "width",
-}, {
-    h: heightScale,
-    "min-h": heightScale,
-    "max-h": heightScale,
-    "max-w": maxWidthScale,
-});
+const sizeUtils = createSizeUtils(
+    {
+        w: "width",
+        h: "height",
+        "max-w": "max-width",
+        "min-w": "min-width",
+        "max-h": "max-height",
+        "min-h": "min-height",
+        size: "width",
+    },
+    {
+        h: heightScale,
+        "min-h": heightScale,
+        "max-h": heightScale,
+        "max-w": maxWidthScale,
+    }
+);
 
 sizeUtils.size!.generate = (val: string) => {
     const cssValue = scaleValue(val, sizeScale);
@@ -196,7 +204,11 @@ insetUtils["inset-y"]!.generate = (val) => {
     return `top: ${cssValue}; bottom: ${cssValue};`;
 };
 
-function createOneToTwelveUtils(prefix: string, property: string, valueBuilder: (n: number) => string): StyleMap {
+function createOneToTwelveUtils(
+    prefix: string,
+    property: string,
+    valueBuilder: (n: number) => string
+): StyleMap {
     return {
         [prefix]: {
             validate: (val) => regex.integer.test(val) && Number(val) >= 1 && Number(val) <= 12,
@@ -222,7 +234,8 @@ const gapUtils: StyleMap = {
 
 const radiusUtils: StyleMap = {
     rounded: {
-        validate: (val) => val === "" || validators.lengthUnit(val) || radiusScale[val] !== undefined,
+        validate: (val) =>
+            val === "" || validators.lengthUnit(val) || radiusScale[val] !== undefined,
         generate: (val) =>
             `border-radius: ${val === "" ? (radiusScale.DEFAULT ?? "0.25rem") : scaleValue(val, radiusScale)};`,
     },
@@ -257,15 +270,25 @@ const radiusUtils: StyleMap = {
 };
 
 const gridUtils: StyleMap = {
-    ...createOneToTwelveUtils("grid-cols", "grid-template-columns", (n) => `repeat(${n}, minmax(0, 1fr))`),
-    ...createOneToTwelveUtils("grid-rows", "grid-template-rows", (n) => `repeat(${n}, minmax(0, 1fr))`),
+    ...createOneToTwelveUtils(
+        "grid-cols",
+        "grid-template-columns",
+        (n) => `repeat(${n}, minmax(0, 1fr))`
+    ),
+    ...createOneToTwelveUtils(
+        "grid-rows",
+        "grid-template-rows",
+        (n) => `repeat(${n}, minmax(0, 1fr))`
+    ),
     "col-span": {
         validate: (val) => val === "full" || regex.integer.test(val),
-        generate: (val) => (val === "full" ? "grid-column: 1 / -1;" : `grid-column: span ${val} / span ${val};`),
+        generate: (val) =>
+            val === "full" ? "grid-column: 1 / -1;" : `grid-column: span ${val} / span ${val};`,
     },
     "row-span": {
         validate: (val) => val === "full" || regex.integer.test(val),
-        generate: (val) => (val === "full" ? "grid-row: 1 / -1;" : `grid-row: span ${val} / span ${val};`),
+        generate: (val) =>
+            val === "full" ? "grid-row: 1 / -1;" : `grid-row: span ${val} / span ${val};`,
     },
 };
 
@@ -290,12 +313,12 @@ const styleMap: StyleMap = {
             fontSizeScale[val] !== undefined
                 ? `font-size: ${scaleValue(val, fontSizeScale)};`
                 : validators.color(val)
-                ? `color: ${val};`
-                : validators.textAlign(val)
+                  ? `color: ${val};`
+                  : validators.textAlign(val)
                     ? `text-align: ${val};`
                     : validators.textTransform(val)
-                        ? `text-transform: ${val};`
-                        : `font-size: ${scaleValue(val, fontSizeScale)};`,
+                      ? `text-transform: ${val};`
+                      : `font-size: ${scaleValue(val, fontSizeScale)};`,
     },
 
     font: {
@@ -383,7 +406,6 @@ const styleMap: StyleMap = {
         validate: validators.flex,
         generate: (val) => `flex: ${val};`,
     },
-
 };
 
 // ─── Class parser ─────────────────────────────────────────────────────────────
