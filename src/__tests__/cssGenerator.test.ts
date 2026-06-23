@@ -1,6 +1,10 @@
 /// <reference types="jest" />
+import fs from "fs";
+import os from "os";
+import path from "path";
 import { generateCSSFromClass } from "../core/cssGenerator.js";
 import { setConfig } from "../core/configCache.js";
+import { generateCombinedCSS } from "../core/cssGenerator.js";
 
 describe("cssGenerator Tailwind-style utilities", () => {
     beforeAll(() => {
@@ -32,5 +36,40 @@ describe("cssGenerator Tailwind-style utilities", () => {
         expect(generateCSSFromClass("font-bold")).toBe(".font-bold { font-weight: 700; }");
         expect(generateCSSFromClass("rounded-lg")).toBe(".rounded-lg { border-radius: 0.5rem; }");
         expect(generateCSSFromClass("rounded")).toBe(".rounded { border-radius: 0.25rem; }");
+    });
+
+    it("extracts utilities from React and Next-style className usage", () => {
+        const tempFile = path.join(os.tmpdir(), `valcss-react-${Date.now()}.tsx`);
+        fs.writeFileSync(
+            tempFile,
+            `
+            export function Card({ active }: { active: boolean }) {
+              return (
+                <div>
+                  <section className="m-1 p-2 text-xl" />
+                  <article className={'w-full rounded-lg'} />
+                  <aside className={active ? "gap-x-4" : "mx-auto"} />
+                  <main className={\`h-screen \${active ? "font-bold" : "p-4"}\`} />
+                </div>
+              );
+            }
+            `,
+            "utf8"
+        );
+
+        const css = generateCombinedCSS([tempFile]);
+
+        expect(css).toContain(".m-1 { margin: 0.25rem; }");
+        expect(css).toContain(".p-2 { padding: 0.5rem; }");
+        expect(css).toContain(".text-xl { font-size: 1.25rem; }");
+        expect(css).toContain(".w-full { width: 100%; }");
+        expect(css).toContain(".rounded-lg { border-radius: 0.5rem; }");
+        expect(css).toContain(".gap-x-4 { column-gap: 1rem; }");
+        expect(css).toContain(".mx-auto { margin-left: auto; margin-right: auto; }");
+        expect(css).toContain(".h-screen { height: 100vh; }");
+        expect(css).toContain(".font-bold { font-weight: 700; }");
+        expect(css).toContain(".p-4 { padding: 1rem; }");
+
+        fs.unlinkSync(tempFile);
     });
 });

@@ -626,11 +626,156 @@ export function generateCSSFromClass(fullClassName: string, getCSSOnly = false):
  * Scans HTML content for `class="..."` attributes, filters for known
  * valcss patterns, and returns the generated CSS rules.
  */
-function extractAndGenerateCSS(htmlContent: string): string {
-    const classAttrMatches = [...htmlContent.matchAll(/class\s*=\s*["']([^"']+)["']/g)];
+function readQuotedSegment(source: string, startIndex: number): { value: string; endIndex: number } {
+    const quote = source[startIndex];
+    let value = "";
+    let i = startIndex + 1;
 
-    const allClasses = classAttrMatches.flatMap((match) =>
-        match[1] ? match[1].trim().split(/\s+/) : []
+    while (i < source.length) {
+        const char = source[i];
+        if (char === "\\") {
+            value += char;
+            i++;
+            if (i < source.length) value += source[i];
+            i++;
+            continue;
+        }
+        if (char === quote) {
+            return { value, endIndex: i };
+        }
+        value += char;
+        i++;
+    }
+
+    return { value, endIndex: source.length - 1 };
+}
+
+function readBraceExpression(source: string, startIndex: number): { value: string; endIndex: number } {
+    let depth = 1;
+    let value = "";
+    let i = startIndex + 1;
+
+    while (i < source.length) {
+        const char = source[i];
+
+        if (char === "'" || char === '"' || char === "`") {
+            const segment = readQuotedSegment(source, i);
+            value += char + segment.value + source[segment.endIndex];
+            i = segment.endIndex + 1;
+            continue;
+        }
+
+        if (char === "{") {
+            depth++;
+        } else if (char === "}") {
+            depth--;
+            if (depth === 0) {
+                return { value, endIndex: i };
+            }
+        }
+
+        value += char;
+        i++;
+    }
+
+    return { value, endIndex: source.length - 1 };
+}
+
+function extractStringLiterals(expression: string): string[] {
+    const values: string[] = [];
+    let i = 0;
+
+    while (i < expression.length) {
+        const char = expression[i];
+
+        if (char === "'" || char === '"') {
+            const segment = readQuotedSegment(expression, i);
+            values.push(segment.value);
+            i = segment.endIndex + 1;
+            continue;
+        }
+
+        if (char === "`") {
+            let templateChunk = "";
+            i++;
+
+            while (i < expression.length) {
+                const templateChar = expression[i];
+
+                if (templateChar === "\\") {
+                    templateChunk += templateChar;
+                    i++;
+                    if (i < expression.length) templateChunk += expression[i];
+                    i++;
+                    continue;
+                }
+
+                if (templateChar === "`") {
+                    if (templateChunk.trim()) {
+                        values.push(templateChunk);
+                    }
+                    i++;
+                    break;
+                }
+
+                if (templateChar === "$" && expression[i + 1] === "{") {
+                    if (templateChunk.trim()) {
+                        values.push(templateChunk);
+                        templateChunk = "";
+                    }
+                    const innerExpression = readBraceExpression(expression, i + 1);
+                    values.push(...extractStringLiterals(innerExpression.value));
+                    i = innerExpression.endIndex + 1;
+                    continue;
+                }
+
+                templateChunk += templateChar;
+                i++;
+            }
+            continue;
+        }
+
+        i++;
+    }
+
+    return values;
+}
+
+function extractClassAttributeValues(content: string): string[] {
+    const values: string[] = [];
+    const attrPattern = /\b(?:class|className)\s*=/g;
+    let match: RegExpExecArray | null;
+
+    while ((match = attrPattern.exec(content)) !== null) {
+        let i = match.index + match[0].length;
+
+        while (i < content.length && /\s/.test(content[i] ?? "")) {
+            i++;
+        }
+
+        const nextChar = content[i];
+        if (!nextChar) continue;
+
+        if (nextChar === "'" || nextChar === '"') {
+            const segment = readQuotedSegment(content, i);
+            values.push(segment.value);
+            attrPattern.lastIndex = segment.endIndex + 1;
+            continue;
+        }
+
+        if (nextChar === "{") {
+            const expression = readBraceExpression(content, i);
+            values.push(...extractStringLiterals(expression.value));
+            attrPattern.lastIndex = expression.endIndex + 1;
+        }
+    }
+
+    return values;
+}
+
+function extractAndGenerateCSS(htmlContent: string): string {
+    const allClasses = extractClassAttributeValues(htmlContent).flatMap((value) =>
+        value ? value.trim().split(/\s+/) : []
     );
 
     const utilitiesMap = getUtilitiesMap();

@@ -1,6 +1,6 @@
 # ⚡ valcss
 
-**valcss** is a tiny, flexible CLI utility to generate atomic and utility-first CSS classes from usage in your HTML and custom plugins. It allows you to configure class patterns, outputs, breakpoints, and even inject CSS directly into your HTML or as a separate file.
+**valcss** is a tiny, flexible CLI utility to generate atomic and utility-first CSS classes from usage in your HTML, React, Next.js, and custom plugins. It allows you to configure class patterns, outputs, breakpoints, and even inject CSS directly into your HTML or as a separate file.
 
 ## Table of Contents
 
@@ -19,13 +19,14 @@
 
 ## Features
 
-- ⚡ Instantly extracts and generates a CSS file from your HTML.
+- ⚡ Instantly extracts and generates a CSS file from your HTML, JSX, and TSX.
 - ⏳ Supports watch mode for live editing.
 - 🧩 Extendable through custom plugins.
 - 🔗 CSS injection: inline in HTML or as a <link>.
 - 📦 Zero-dependency CLI.
 - 🌈 Supports breakpoints (responsive utilities).
 - 📝 Customizable with a simple JS config file.
+- ⚛️ Supports React and Next.js `className` patterns.
 
 ---
 
@@ -55,7 +56,7 @@ valcss init --ts
 ```js
 // valcss.config.cjs
 module.exports = {
-  files: ["index.html", "src/**/*.html"],
+  files: ["**/*.{html,js,jsx,ts,tsx}"],
   output: "valcss-main.css",
   inject: {
     mode: "link", // or "inline"
@@ -83,7 +84,7 @@ module.exports = {
 
 ---
 
-### 2. Add utility CSS classes in your HTML:
+### 2. Add utility CSS classes in your markup:
 
 Example ([index.html](https://github.com/hardik-143/valcss/blob/main/index.html)):
 
@@ -94,6 +95,16 @@ Example ([index.html](https://github.com/hardik-143/valcss/blob/main/index.html)
 </div>
 ```
 
+```tsx
+export function Card() {
+  return (
+    <section className="m-1 p-2 text-xl rounded-lg">
+      <div className={true ? "w-full" : "mx-auto"}>Hello</div>
+    </section>
+  );
+}
+```
+
 ---
 
 ### 3. Build your CSS
@@ -102,7 +113,7 @@ Example ([index.html](https://github.com/hardik-143/valcss/blob/main/index.html)
 valcss
 ```
 
-- This scans your HTML, generates only the CSS classes you actually use, and writes them to `valcss-main.css`.
+- This scans your HTML, JSX, and TSX files, generates only the CSS classes you actually use, and writes them to `valcss-main.css`.
 - The CSS is injected (as a link or inline) into your specified HTML targets.
 
 ---
@@ -118,6 +129,8 @@ The config file lets you control:
 - **plugins**: Extendable utility generators.
 
 See [`valcss.config.cjs`](https://github.com/hardik-143/valcss/blob/main/valcss.config.cjs) for an example.
+
+`**/*.{html,js,jsx,ts,tsx}` is a good default for mixed HTML, React, and Next.js projects. valcss skips common generated/vendor folders like `node_modules`, `dist`, `.next`, `coverage`, `build`, and `out` while resolving that pattern.
 
 ---
 

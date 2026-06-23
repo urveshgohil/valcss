@@ -29,7 +29,7 @@ if (args[0] === "init") {
     }
 
     const configObject = `{
-  files: ["index.html", "src/**/*.html"],
+  files: ["**/*.{html,js,jsx,ts,tsx}"],
   output: "valcss-main.css",
   inject: {
     mode: "link", // "inline" or "link"
@@ -59,7 +59,7 @@ if (args[0] === "init") {
     const defaultConfig =
         configFormat === "json"
             ? `{
-  "files": ["index.html", "src/**/*.html"],
+  "files": ["**/*.{html,js,jsx,ts,tsx}"],
   "output": "valcss-main.css",
   "inject": {
     "mode": "link",
