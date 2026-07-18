@@ -8,3 +8,4 @@ valcss.config.js
 # Only include built version
 !dist/
 !README.md
+!CHANGELOG.md

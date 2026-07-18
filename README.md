@@ -1,6 +1,6 @@
 # ⚡ valcss
 
-**valcss** is a tiny, flexible CLI utility to generate atomic and utility-first CSS classes from usage in your HTML and custom plugins. It allows you to configure class patterns, outputs, breakpoints, and even inject CSS directly into your HTML or as a separate file.
+**valcss** is a tiny, flexible CLI utility to generate atomic and utility-first CSS classes from usage in your HTML, React, Next.js, style files, and custom plugins. It allows you to configure class patterns, outputs, breakpoints, and even inject CSS directly into your HTML or as a separate file.
 
 ## Table of Contents
 
@@ -19,13 +19,15 @@
 
 ## Features
 
-- ⚡ Instantly extracts and generates a CSS file from your HTML.
+- ⚡ Instantly extracts and generates a CSS file from your HTML, JSX, TSX, and `@apply` directives in style files.
 - ⏳ Supports watch mode for live editing.
 - 🧩 Extendable through custom plugins.
 - 🔗 CSS injection: inline in HTML or as a <link>.
 - 📦 Zero-dependency CLI.
 - 🌈 Supports breakpoints (responsive utilities).
 - 📝 Customizable with a simple JS config file.
+- ⚛️ Supports React and Next.js `className` patterns.
+- 🎨 Supports `@apply` in `.css`, `.scss`, `.sass`, and `.less` files.
 
 ---
 
@@ -45,12 +47,17 @@ npm install -g valcss
 valcss init
 ```
 
-This creates a `valcss.config.js` file in your project:
+This creates a `valcss.config.cjs` file in your project. You can choose another format with `--js`, `--ts`, or `--json`:
+
+```bash
+valcss init --js
+valcss init --ts
+```
 
 ```js
-// valcss.config.js
+// valcss.config.cjs
 module.exports = {
-  files: ["index.html", "src/**/*.html"],
+  files: ["**/*.{html,js,jsx,ts,tsx,css,scss,sass,less}"],
   output: "valcss-main.css",
   inject: {
     mode: "link", // or "inline"
@@ -78,7 +85,7 @@ module.exports = {
 
 ---
 
-### 2. Add utility CSS classes in your HTML:
+### 2. Add utility CSS classes in your markup:
 
 Example ([index.html](https://github.com/hardik-143/valcss/blob/main/index.html)):
 
@@ -89,6 +96,30 @@ Example ([index.html](https://github.com/hardik-143/valcss/blob/main/index.html)
 </div>
 ```
 
+```tsx
+export function Card() {
+  return (
+    <section className="m-1 p-2 text-xl rounded-lg">
+      <div className={true ? "w-full" : "mx-auto"}>Hello</div>
+    </section>
+  );
+}
+```
+
+```scss
+.card {
+  @apply mx-auto text-xl;
+}
+
+.hero {
+  @apply mx-auto !important;
+}
+
+.cta {
+  @apply !mx-auto;
+}
+```
+
 ---
 
 ### 3. Build your CSS
@@ -97,7 +128,7 @@ Example ([index.html](https://github.com/hardik-143/valcss/blob/main/index.html)
 valcss
 ```
 
-- This scans your HTML, generates only the CSS classes you actually use, and writes them to `valcss-main.css`.
+- This scans your HTML, JSX, TSX, CSS, SCSS, Sass, and Less files, generates only the CSS classes you actually use, expands `@apply`, and writes the result to `valcss-main.css`.
 - The CSS is injected (as a link or inline) into your specified HTML targets.
 
 ---
@@ -112,7 +143,9 @@ The config file lets you control:
 - **breakpoints**: Custom responsive breakpoints.
 - **plugins**: Extendable utility generators.
 
-See [`valcss.config.js`](https://github.com/hardik-143/valcss/blob/main/valcss.config.js) for an example.
+See [`valcss.config.cjs`](https://github.com/hardik-143/valcss/blob/main/valcss.config.cjs) for an example.
+
+`**/*.{html,js,jsx,ts,tsx,css,scss,sass,less}` is a good default for mixed HTML, React, Next.js, and style-file projects. valcss skips common generated/vendor folders like `node_modules`, `dist`, `.next`, `coverage`, `build`, and `out` while resolving that pattern.
 
 ---
 
@@ -124,6 +157,8 @@ See [`valcss.config.js`](https://github.com/hardik-143/valcss/blob/main/valcss.c
 | `valcss --output <file>` | Override the default output file     |
 | `valcss --watch`         | Enable file watching/live rebuilds   |
 | `valcss init`            | Scaffold a config file               |
+| `valcss init --js`       | Scaffold an ESM JS config file       |
+| `valcss init --ts`       | Scaffold a TS config file            |
 | `valcss --dry-run`       | Print generated CSS to terminal only |
 | `valcss --help`          | Show help message                    |
 
