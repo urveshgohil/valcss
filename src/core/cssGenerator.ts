@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import { validators, regex } from "../utils/validators.js";
 import { stripComments } from "../utils/stripComments.js";
 import { normalizeCalcExpression, normalizeCSSMath } from "../utils/normalizeCalcExpression.js";
@@ -489,6 +490,41 @@ function addImportantToDeclarations(css: string): string {
         .join(" ");
 }
 
+const styleFileExtensions = new Set([".css", ".scss", ".sass", ".less"]);
+
+function expandApplyUtilities(expression: string): string | null {
+    const tokens = expression
+        .trim()
+        .split(/\s+/)
+        .map((token) => token.trim())
+        .filter(Boolean);
+
+    if (tokens.length === 0) return null;
+
+    const forceImportant = tokens[tokens.length - 1] === "!important";
+    const utilityTokens = forceImportant ? tokens.slice(0, -1) : tokens;
+
+    const declarations = utilityTokens
+        .map((token) => generateCSSFromClass(token, true))
+        .filter(Boolean)
+        .join(" ");
+
+    if (!declarations) return null;
+
+    return forceImportant ? addImportantToDeclarations(declarations) : declarations;
+}
+
+function processApplyDirectives(filePath: string, content: string): string {
+    if (!styleFileExtensions.has(path.extname(filePath).toLowerCase()) || !content.includes("@apply")) {
+        return "";
+    }
+
+    return content.replace(/@apply\s+([^;]+);/g, (fullMatch, expression: string) => {
+        const expanded = expandApplyUtilities(expression);
+        return expanded ?? fullMatch;
+    });
+}
+
 // ─── Main class → CSS generator ───────────────────────────────────────────────
 
 /**
@@ -820,7 +856,15 @@ export function generateCombinedCSS(filePaths: string[]): string {
     for (const filePath of filePaths) {
         const raw = fs.readFileSync(filePath, "utf8");
         const clean = stripComments(raw);
-        combined += extractAndGenerateCSS(clean) + "\n";
+        const applyCSS = processApplyDirectives(filePath, clean);
+        const utilityCSS = extractAndGenerateCSS(clean);
+
+        if (applyCSS) {
+            combined += applyCSS.trim() + "\n";
+        }
+        if (utilityCSS) {
+            combined += utilityCSS + "\n";
+        }
     }
 
     return combined.trim();

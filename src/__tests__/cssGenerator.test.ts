@@ -72,4 +72,37 @@ describe("cssGenerator Tailwind-style utilities", () => {
 
         fs.unlinkSync(tempFile);
     });
+
+    it("expands @apply directives in style files", () => {
+        const tempFile = path.join(os.tmpdir(), `valcss-apply-${Date.now()}.scss`);
+        fs.writeFileSync(
+            tempFile,
+            `
+            .card {
+              @apply mx-auto text-xl;
+            }
+
+            .hero {
+              @apply mx-auto !important;
+            }
+
+            .cta {
+              @apply !mx-auto;
+            }
+            `,
+            "utf8"
+        );
+
+        const css = generateCombinedCSS([tempFile]);
+
+        expect(css).toContain(".card {");
+        expect(css).toContain("margin-left: auto; margin-right: auto;");
+        expect(css).toContain("font-size: 1.25rem;");
+        expect(css).toContain(".hero {");
+        expect(css).toContain("margin-left: auto !important; margin-right: auto !important;");
+        expect(css).toContain(".cta {");
+        expect(css).toContain("margin-left: auto !important; margin-right: auto !important;");
+
+        fs.unlinkSync(tempFile);
+    });
 });

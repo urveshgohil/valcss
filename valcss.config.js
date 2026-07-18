@@ -4,7 +4,7 @@
 
 /** @type {import('./dist/types/index').ValCSSConfig} */
 module.exports = {
-  files: ["**/*.{html,js,jsx,ts,tsx}"],
+  files: ["**/*.{html,js,jsx,ts,tsx,css,scss,sass,less}"],
   output: "valcss-main.css",
 
   inject: {

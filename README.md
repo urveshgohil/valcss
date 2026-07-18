@@ -1,6 +1,6 @@
 # ⚡ valcss
 
-**valcss** is a tiny, flexible CLI utility to generate atomic and utility-first CSS classes from usage in your HTML, React, Next.js, and custom plugins. It allows you to configure class patterns, outputs, breakpoints, and even inject CSS directly into your HTML or as a separate file.
+**valcss** is a tiny, flexible CLI utility to generate atomic and utility-first CSS classes from usage in your HTML, React, Next.js, style files, and custom plugins. It allows you to configure class patterns, outputs, breakpoints, and even inject CSS directly into your HTML or as a separate file.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@
 
 ## Features
 
-- ⚡ Instantly extracts and generates a CSS file from your HTML, JSX, and TSX.
+- ⚡ Instantly extracts and generates a CSS file from your HTML, JSX, TSX, and `@apply` directives in style files.
 - ⏳ Supports watch mode for live editing.
 - 🧩 Extendable through custom plugins.
 - 🔗 CSS injection: inline in HTML or as a <link>.
@@ -27,6 +27,7 @@
 - 🌈 Supports breakpoints (responsive utilities).
 - 📝 Customizable with a simple JS config file.
 - ⚛️ Supports React and Next.js `className` patterns.
+- 🎨 Supports `@apply` in `.css`, `.scss`, `.sass`, and `.less` files.
 
 ---
 
@@ -56,7 +57,7 @@ valcss init --ts
 ```js
 // valcss.config.cjs
 module.exports = {
-  files: ["**/*.{html,js,jsx,ts,tsx}"],
+  files: ["**/*.{html,js,jsx,ts,tsx,css,scss,sass,less}"],
   output: "valcss-main.css",
   inject: {
     mode: "link", // or "inline"
@@ -105,6 +106,20 @@ export function Card() {
 }
 ```
 
+```scss
+.card {
+  @apply mx-auto text-xl;
+}
+
+.hero {
+  @apply mx-auto !important;
+}
+
+.cta {
+  @apply !mx-auto;
+}
+```
+
 ---
 
 ### 3. Build your CSS
@@ -113,7 +128,7 @@ export function Card() {
 valcss
 ```
 
-- This scans your HTML, JSX, and TSX files, generates only the CSS classes you actually use, and writes them to `valcss-main.css`.
+- This scans your HTML, JSX, TSX, CSS, SCSS, Sass, and Less files, generates only the CSS classes you actually use, expands `@apply`, and writes the result to `valcss-main.css`.
 - The CSS is injected (as a link or inline) into your specified HTML targets.
 
 ---
@@ -130,7 +145,7 @@ The config file lets you control:
 
 See [`valcss.config.cjs`](https://github.com/hardik-143/valcss/blob/main/valcss.config.cjs) for an example.
 
-`**/*.{html,js,jsx,ts,tsx}` is a good default for mixed HTML, React, and Next.js projects. valcss skips common generated/vendor folders like `node_modules`, `dist`, `.next`, `coverage`, `build`, and `out` while resolving that pattern.
+`**/*.{html,js,jsx,ts,tsx,css,scss,sass,less}` is a good default for mixed HTML, React, Next.js, and style-file projects. valcss skips common generated/vendor folders like `node_modules`, `dist`, `.next`, `coverage`, `build`, and `out` while resolving that pattern.
 
 ---
 
